@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle, Mail, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -11,7 +11,7 @@ interface SessionInfo {
   status: string;
 }
 
-export default function ApplySuccessPage() {
+function SuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const [sessionInfo, setSessionInfo] = useState<SessionInfo | null>(null);
@@ -121,5 +121,29 @@ export default function ApplySuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center p-4">
+      <div className="max-w-lg w-full">
+        <div className="bg-white rounded-2xl shadow-lg border p-8 text-center">
+          <div className="mb-6">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-slate-100 rounded-full animate-pulse" />
+          </div>
+          <div className="h-8 bg-slate-100 rounded animate-pulse mb-2" />
+          <div className="h-4 bg-slate-100 rounded animate-pulse w-3/4 mx-auto" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function ApplySuccessPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <SuccessContent />
+    </Suspense>
   );
 }
