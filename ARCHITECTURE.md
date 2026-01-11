@@ -603,7 +603,7 @@ stateDiagram-v2
 DATABASE_URL=postgresql://...
 
 # NextAuth
-NEXTAUTH_URL=https://lesson.primamateria.co.jp
+NEXTAUTH_URL=https://manager.primamateria.co.jp
 NEXTAUTH_SECRET=...
 
 # Stripe

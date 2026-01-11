@@ -18,7 +18,7 @@ function getResend(): Resend {
 
 const FROM_EMAIL = process.env.EMAIL_FROM || "PrimaMateria <onboarding@resend.dev>";
 const SUPPORT_EMAIL = "support@primamateria.co.jp";
-const LOGIN_URL = "https://lesson.primamateria.co.jp/login";
+const LOGIN_URL = "https://manager.primamateria.co.jp/login";
 const COMMUNITY_URL = "https://discord.gg/primamateria";
 
 // 共通のメールスタイル
