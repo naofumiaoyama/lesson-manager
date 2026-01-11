@@ -2,6 +2,8 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { schedules, students } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
+
+export const dynamic = "force-dynamic";
 import {
   Card,
   CardContent,

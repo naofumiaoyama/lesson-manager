@@ -2,6 +2,8 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { students } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
+
+export const dynamic = "force-dynamic";
 import {
   Card,
   CardContent,

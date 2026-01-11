@@ -2,6 +2,8 @@ import { db } from "@/lib/db";
 import { students } from "@/drizzle/schema";
 import { not, eq } from "drizzle-orm";
 import Link from "next/link";
+
+export const dynamic = "force-dynamic";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Clock } from "lucide-react";

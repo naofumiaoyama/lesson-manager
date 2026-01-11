@@ -2,6 +2,8 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { students, lessons } from "@/drizzle/schema";
 import { eq, and, gte, lte } from "drizzle-orm";
+
+export const dynamic = "force-dynamic";
 import {
   Card,
   CardContent,

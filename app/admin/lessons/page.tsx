@@ -2,6 +2,9 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { lessons, students, admins } from "@/drizzle/schema";
 import { desc, eq } from "drizzle-orm";
+
+// ビルド時の静的生成を無効化（DBクエリがあるため）
+export const dynamic = "force-dynamic";
 import {
   Card,
   CardContent,
