@@ -3,7 +3,18 @@ import type { Student, Lesson } from "@/drizzle/schema";
 import { db } from "@/lib/db";
 import { emailLogs } from "@/drizzle/schema";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Resend の遅延初期化（ビルド時にエラーを回避）
+let resendInstance: Resend | null = null;
+
+function getResend(): Resend {
+  if (!resendInstance) {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error("RESEND_API_KEY is not set");
+    }
+    resendInstance = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendInstance;
+}
 
 const FROM_EMAIL = process.env.EMAIL_FROM || "PrimaMateria <onboarding@resend.dev>";
 const SUPPORT_EMAIL = "support@primamateria.co.jp";
@@ -41,7 +52,7 @@ async function logEmail(
 }
 
 export async function sendWelcomeEmail(student: Student) {
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM_EMAIL,
     to: student.email,
     subject: "【PrimaMateria】ご入会ありがとうございます",
@@ -84,7 +95,7 @@ export async function sendLessonConfirmationEmail(
     minute: "2-digit",
   });
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM_EMAIL,
     to: student.email,
     subject: `【PrimaMateria】第${lesson.lessonNumber}回レッスンのご案内`,
@@ -130,7 +141,7 @@ export async function sendLessonConfirmedEmail(
     minute: "2-digit",
   });
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM_EMAIL,
     to: student.email,
     subject: "【PrimaMateria】初回レッスン日程のお知らせ",
@@ -175,7 +186,7 @@ export async function sendCommunityInviteEmail(
   student: Student,
   discordInviteUrl: string
 ) {
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM_EMAIL,
     to: student.email,
     subject: "【PrimaMateria】コミュニティへようこそ",
@@ -226,7 +237,7 @@ export async function sendCommunityInviteEmail(
 export async function sendApplicationAutoReplyEmail(student: Student) {
   const subject = "【PrimaMateria】お申し込みありがとうございます";
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM_EMAIL,
       to: student.email,
       subject,
@@ -302,7 +313,7 @@ export async function sendCounselingReminderEmail(
   });
 
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM_EMAIL,
       to: student.email,
       subject,
@@ -375,7 +386,7 @@ export async function sendAccountCreationEmail(
 ) {
   const subject = "【PrimaMateria】アカウント作成完了のお知らせ";
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM_EMAIL,
       to: student.email,
       subject,
@@ -447,7 +458,7 @@ export async function sendAccountCreationEmail(
 export async function sendLessonBookingReminderEmail(student: Student) {
   const subject = "【PrimaMateria】レッスンのご予約はお済みですか？";
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM_EMAIL,
       to: student.email,
       subject,
@@ -520,7 +531,7 @@ export async function sendLessonDayBeforeReminderEmail(
   });
 
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM_EMAIL,
       to: student.email,
       subject,
@@ -606,7 +617,7 @@ export async function sendWeeklyLearningGoalsEmail(
 ) {
   const subject = "【PrimaMateria】今週の学習目標";
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM_EMAIL,
       to: student.email,
       subject,
@@ -686,7 +697,7 @@ export async function sendMonthlyProgressReportEmail(
   const completionRate = Math.round((report.lessonsCompleted / report.lessonsTotal) * 100);
 
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM_EMAIL,
       to: student.email,
       subject,
@@ -776,7 +787,7 @@ export async function sendCheckinAfterNoLoginEmail(
 ) {
   const subject = "【PrimaMateria】最近の学習状況はいかがですか？";
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM_EMAIL,
       to: student.email,
       subject,
@@ -849,7 +860,7 @@ export async function sendMidtermSurveyEmail(
 ) {
   const subject = "【PrimaMateria】1ヶ月間ありがとうございます - ご意見をお聞かせください";
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM_EMAIL,
       to: student.email,
       subject,
@@ -912,7 +923,7 @@ export async function sendMidtermSurveyEmail(
 export async function sendPaymentFailedEmail(student: Student) {
   const subject = "【PrimaMateria】お支払いに関するお知らせ";
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM_EMAIL,
       to: student.email,
       subject,
