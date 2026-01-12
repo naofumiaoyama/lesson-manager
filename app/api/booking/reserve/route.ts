@@ -94,10 +94,12 @@ export async function POST(request: NextRequest) {
       month: "long",
       day: "numeric",
       weekday: "long",
+      timeZone: "Asia/Tokyo",
     });
     const formattedTime = startTime.toLocaleTimeString("ja-JP", {
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: "Asia/Tokyo",
     });
 
     const event = await calendar.events.insert({
