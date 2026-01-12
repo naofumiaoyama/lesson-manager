@@ -196,6 +196,12 @@ PrimaMateria AIプログラミングスクール
             </div>
             ` : ""}
 
+            <div style="text-align: center; margin: 24px 0;">
+              <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(`【無料相談】PrimaMateria AIプログラミングスクール`)}&dates=${startTime.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")}/${endTime.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")}&details=${encodeURIComponent(`PrimaMateria AIプログラミングスクール 無料相談\n\n参加URL: ${meetingUrl || "後日お送りします"}\n\n■ 当日のご準備\n・PC またはタブレット\n・安定したインターネット環境\n・ご質問やご相談内容のメモ（あれば）`)}&location=${encodeURIComponent(meetingUrl || "オンライン")}" target="_blank" style="display: inline-block; background-color: #4285f4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                📅 Googleカレンダーに追加
+              </a>
+            </div>
+
             <div style="background: #fef3c7; padding: 16px; border-radius: 8px; margin: 24px 0;">
               <h3 style="margin-top: 0; color: #92400e;">当日のご準備</h3>
               <ul style="margin: 0; padding-left: 20px; color: #92400e;">
