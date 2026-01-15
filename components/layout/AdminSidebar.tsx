@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
+  Clock,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -17,6 +18,7 @@ const navigation = [
   { name: "ダッシュボード", href: "/admin", icon: LayoutDashboard },
   { name: "生徒管理", href: "/admin/students", icon: Users },
   { name: "スケジュール", href: "/admin/schedule", icon: Calendar },
+  { name: "予約可能日時", href: "/admin/availability", icon: Clock },
   { name: "設定", href: "/admin/settings", icon: Settings },
 ];
 

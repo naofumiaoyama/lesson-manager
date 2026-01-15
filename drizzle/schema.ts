@@ -56,6 +56,8 @@ export const emailTypeEnum = pgEnum("email_type", [
 
 export const emailStatusEnum = pgEnum("email_status", ["sent", "failed"]);
 
+export const exceptionTypeEnum = pgEnum("exception_type", ["unavailable"]);
+
 // Tables
 export const students = pgTable("students", {
   id: serial("id").primaryKey(),
@@ -143,6 +145,35 @@ export const emailLogs = pgTable("email_logs", {
   status: emailStatusEnum("status").notNull(),
 });
 
+// 予約可能日時のデフォルト設定（曜日ごと）
+export const availabilityDefaults = pgTable("availability_defaults", {
+  id: serial("id").primaryKey(),
+  dayOfWeek: integer("day_of_week").notNull(), // 0-6 (Sunday-Saturday)
+  startTime: varchar("start_time", { length: 5 }).notNull(), // HH:MM format
+  endTime: varchar("end_time", { length: 5 }).notNull(), // HH:MM format
+  isEnabled: integer("is_enabled").notNull().default(1), // 1=enabled, 0=disabled
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+// 特定日時の例外設定（オフにする日時）
+export const availabilityExceptions = pgTable("availability_exceptions", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull(),
+  startTime: varchar("start_time", { length: 5 }), // HH:MM format (null = all day)
+  endTime: varchar("end_time", { length: 5 }), // HH:MM format (null = all day)
+  type: exceptionTypeEnum("type").notNull().default("unavailable"),
+  reason: varchar("reason", { length: 255 }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
 // Relations
 export const studentsRelations = relations(students, ({ many }) => ({
   lessons: many(lessons),
@@ -200,3 +231,7 @@ export type Lesson = typeof lessons.$inferSelect;
 export type NewLesson = typeof lessons.$inferInsert;
 export type EmailLog = typeof emailLogs.$inferSelect;
 export type NewEmailLog = typeof emailLogs.$inferInsert;
+export type AvailabilityDefault = typeof availabilityDefaults.$inferSelect;
+export type NewAvailabilityDefault = typeof availabilityDefaults.$inferInsert;
+export type AvailabilityException = typeof availabilityExceptions.$inferSelect;
+export type NewAvailabilityException = typeof availabilityExceptions.$inferInsert;
