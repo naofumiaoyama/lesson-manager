@@ -45,6 +45,23 @@ const DEFAULT_BUSINESS_HOURS = {
 // デフォルトの予約可能な曜日（DBに設定がない場合のフォールバック）
 const DEFAULT_AVAILABLE_DAYS = [1, 2, 3, 4, 5]; // 月〜金
 
+// JSTのオフセット（分）
+const JST_OFFSET = 9 * 60;
+
+// JSTの日付を取得するヘルパー関数
+function getJSTDate(date: Date): Date {
+  // UTCの時間にJSTオフセットを加算
+  const utc = date.getTime() + date.getTimezoneOffset() * 60000;
+  return new Date(utc + JST_OFFSET * 60000);
+}
+
+// JST時間でDateオブジェクトを作成するヘルパー関数
+function createJSTDate(year: number, month: number, day: number, hour: number, minute: number): Date {
+  // JST時間をUTCに変換
+  const jstDate = new Date(Date.UTC(year, month, day, hour - 9, minute, 0, 0));
+  return jstDate;
+}
+
 // DBから予約可能設定を取得
 async function getAvailabilitySettings() {
   const defaults = await db.select().from(availabilityDefaults);
@@ -91,11 +108,14 @@ export async function GET(request: NextRequest) {
     const endParam = searchParams.get("end");
     const daysAhead = parseInt(searchParams.get("days") || "14");
 
-    // デフォルトは今日から2週間
-    const now = new Date();
+    // 現在時刻（JST）
+    const nowUTC = new Date();
+    const nowJST = getJSTDate(nowUTC);
+
+    // デフォルトは明日から2週間（JST基準）
     const startDate = startParam
       ? new Date(startParam)
-      : new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1); // 明日から
+      : createJSTDate(nowJST.getFullYear(), nowJST.getMonth(), nowJST.getDate() + 1, 0, 0);
     const endDate = endParam
       ? new Date(endParam)
       : new Date(startDate.getTime() + daysAhead * 24 * 60 * 60 * 1000);
@@ -128,18 +148,24 @@ export async function GET(request: NextRequest) {
 
     // 利用可能なスロットを計算
     const availableSlots: { date: string; slots: { start: string; end: string }[] }[] = [];
-    const currentDate = new Date(startDate);
 
-    while (currentDate < endDate) {
-      const dayOfWeek = currentDate.getDay();
-      const dateStr = currentDate.toISOString().split("T")[0];
+    // JSTの日付でループを回す
+    let currentJSTDate = getJSTDate(startDate);
+    const endJSTDate = getJSTDate(endDate);
+
+    while (currentJSTDate < endJSTDate) {
+      const dayOfWeek = currentJSTDate.getDay();
+      const year = currentJSTDate.getFullYear();
+      const month = currentJSTDate.getMonth();
+      const day = currentJSTDate.getDate();
+      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
       // この日が例外として無効になっていないかチェック
       const exception = exceptionMap.get(dateStr);
       if (exception && exception.type === "unavailable") {
         // 終日無効の場合はスキップ
         if (!exception.startTime && !exception.endTime) {
-          currentDate.setDate(currentDate.getDate() + 1);
+          currentJSTDate = new Date(currentJSTDate.getTime() + 24 * 60 * 60 * 1000);
           continue;
         }
       }
@@ -155,16 +181,14 @@ export async function GET(request: NextRequest) {
         const [startHour, startMin] = daySetting.startTime.split(":").map(Number);
         const [endHour, endMin] = daySetting.endTime.split(":").map(Number);
 
-        // 営業時間内のスロットを生成（1時間単位）
+        // 営業時間内のスロットを生成（1時間単位）- JST時間で
         for (let hour = startHour; hour < endHour; hour++) {
-          const slotStart = new Date(currentDate);
-          slotStart.setHours(hour, startMin || 0, 0, 0);
+          // JST時間でスロットを作成（内部的にはUTCに変換される）
+          const slotStart = createJSTDate(year, month, day, hour, startMin || 0);
+          const slotEnd = createJSTDate(year, month, day, hour + 1, startMin || 0);
 
-          const slotEnd = new Date(slotStart);
-          slotEnd.setHours(hour + 1, startMin || 0, 0, 0);
-
-          // 過去の時間はスキップ
-          if (slotStart <= now) {
+          // 過去の時間はスキップ（UTC比較）
+          if (slotStart <= nowUTC) {
             continue;
           }
 
@@ -200,7 +224,8 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      currentDate.setDate(currentDate.getDate() + 1);
+      // 次の日へ
+      currentJSTDate = new Date(currentJSTDate.getTime() + 24 * 60 * 60 * 1000);
     }
 
     return NextResponse.json({
